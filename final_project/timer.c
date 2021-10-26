@@ -46,7 +46,7 @@ void Timer_Init(const timer_configiration *config_ptr) {
 		/* This variable is used to store the mode value (NM or CTC) */
 		mode_timer0 = config_ptr->mode;
 
-		/* In register TCCR0: Bit 2:0 – CS02:0: Clock Select */
+		/* TCCR0: Bit 2:0 – CS02:0: Clock Select */
 		TCCR0 = (TCCR0 & 0xF8) | (config_ptr->prescalar);
 
 		if (mode_timer0 == CTC_MODE) {
@@ -159,34 +159,58 @@ void Timer_deInit(const timer_configiration *config_ptr) {
 		/* Bit 0 – TOIE0: Timer/Counter0 Overflow Interrupt Disable */
 		TIMSK &= ~(1 << TOIE0);
 
-		/* The FOC0 bit is only active when the WGM00 bit specifies a non-PWM mode. */
-		TCCR0 &= ~(1 << FOC0);
+		/* The FOC0 bit is only active when the WGM00 bit specifies a non-PWM mode
+		 * TCCR0: Bit 3, 6 – WGM01:0: Waveform Generation Mode
+		 * Bit 2:0 – CS02:0: Clock Select
+		 */
+		TCCR0 = 0;
 
-		/* In register TCCR0: Bit 3, 6 – WGM01:0: Waveform Generation Mode */
-		GPIO_writePin(TCCR0, WGM01, LOGIC_LOW);
-		GPIO_writePin(TCCR0, WGM00, LOGIC_LOW);
+		/* Compare value */
+		OCR0 = 0;
 
-		/*  Bit 2:0 – CS02:0: Clock Select */
-		GPIO_writePin(TCCR0, WGM00, LOGIC_LOW);
+		/* Initial Value */
+		TCNT0 = 0;
 
 	} else if (config_ptr->number == TIMER1) {
 
 		/* Bit 4 – OCIE1A: Timer/Counter1, Output Compare A Match Interrupt Disable
-		 * Bit 3 – OCIE1B: Timer/Counter1, Output Compare B Match Interrupt Disable */
-		TIMSK &= ~(1 << OCIE1A) & ~(1 << OCIE1B);
+		 * Bit 3 – OCIE1B: Timer/Counter1, Output Compare B Match Interrupt Disable
+		 *Bit 2 – TOIE1: Timer/Counter1, Overflow Interrupt Enable/
+		 TIMSK &= ~(1 << OCIE1A) & ~(1 << OCIE1B) & ~(1 <<  TOIE1);
 
-		/* Bit 3 – FOC1A: Force Output Compare for Channel A
-		 * Bit 2 – FOC1B: Force Output Compare for Channel B */
-		TCCR1A &= ~(1 << FOC1A) & ~(1 << FOC1B);
+		 /* Bit 3 – FOC1A: Force Output Compare for Channel A
+		 * Bit 2 – FOC1B: Force Output Compare for Channel B
+		 * Bit 1:0 – WGM11:0: Waveform Generation Mode
+		 */
+		TCCR1A = 0;
 
-		/*  Bit 1:0 – WGM11:0: Waveform Generation Mode */
-		GPIO_writePin(TCCR1A, WGM10, LOGIC_LOW);
-		GPIO_writePin(TCCR1A, WGM11, LOGIC_LOW);
+		/* TCCR1B: Bit 2:0 – CS12:0: Clock Select */
+		TCCR1B = 0;
 
-		/* In register TCCR0: Bit 2:0 – CS02:0: Clock Select */
-		GPIO_writePin(TCCR1B, CS10, LOGIC_LOW);
-		GPIO_writePin(TCCR1B, CS11, LOGIC_LOW);
-		GPIO_writePin(TCCR1B, CS12, LOGIC_LOW);
+		/* Compare value */
+		OCR1A = 0;
+		OCR1B = 0;
+
+		/* Initial value */
+		TCNT1 = 0;
+
+	} else if (config_ptr->number == TIMER2) {
+
+		/*  Bit 7 – OCIE2: Timer/Counter2 Output Compare Match Interrupt Disable
+		 *  Bit 6 – TOIE2: Timer/Counter2 Overflow Interrupt  Disable */
+		TIMSK &= ~(1 << OCIE2) & ~(1 << OCIE2);
+
+		/* Bit 7 – FOC2: Force Output Compare
+		 * Bit 3, 6 – WGM21:0: Waveform Generation Mode
+		 *  Bit 2:0 – CS22:0: Clock Select
+		 */
+		TCCR2 = 0;
+
+		/* Compare value */
+		OCR2 = 0;
+
+		/* Initial value */
+		TCNT2 = 0;
 	}
 }
 
