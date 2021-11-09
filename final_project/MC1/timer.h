@@ -8,6 +8,10 @@
 #ifndef TIMER_H_
 #define TIMER_H_
 
+#include "std_types.h"
+#include "micro_config.h"
+#include "common_macros.h"
+
 /********************************************************************************************************
  * 											Definitions													*
  *******************************************************************************************************/
@@ -22,16 +26,36 @@
 #define Timer1_compare_value 				50
 #define Timer2_compare_value 				50
 
-#define F_CPU								1000000UL
-
 /* F_CPU = 1MHz
  * Prescalar (N) = 256
  * F_timer = (F_CPU / N)
- * T_timer = 1 / F_timer
- * T_overflow = 256 * T_timer
- * No. of overflows per second = 1 / t_overflow = 15.25 overflows/second
+ * T_timer0 = 1 / F_timer0
+ * T_overflow = 256 * T_timer0
+ * No. of overflows per second = 1 / T_overflow = 15.25 overflows/second
  */
 #define NUMBER_OF_OVERFLOWS_PER_SECOND_T0	15.25
+
+/* F_CPU = 1MHz
+ * Prescalar (N) = 256
+ * F_timer1 = (F_CPU / N)
+ * T_timer1 = 1 / F_timer1
+ * T_overflow = 1024 * T_timer1
+ * No. of overflows per second = 1 / T_overflow = 3.81 overflows/second
+ */
+#define NUMBER_OF_OVERFLOWS_PER_SECOND_T1	3.81
+
+/* F_CPU = 1MHz
+ * Prescalar (N) = 256
+ * F_timer2 = (F_CPU / N)
+ * T_timer2 = 1 / F_timer
+ * T2_overflow = 256 * T_timer2
+ * No. of overflows per second = 1 / T_overflow = 3.81 overflows/second
+ */
+#define NUMBER_OF_OVERFLOWS_PER_SECOND_T2	15.25
+
+extern volatile uint32 SECONDS_T1;
+extern volatile uint32 SECONDS_T0_MC1;
+extern volatile uint32 SECONDS_T0_MC2;
 
 typedef enum {
 	NO_CLOCK, NO_PRESCALING, F_CPU_8, F_CPU_64, F_CPU_256, F_CPU_1024
@@ -47,9 +71,16 @@ typedef enum {
 
 typedef struct {
 	timer_mode mode;
-	timer_prescalar prescalar;
+	timer_prescalar clock;
 	timer_number number;
-} timer_configiration;
+	uint16 compare_value;
+	uint16 initial_value;
+} timer_configuration;
+
+typedef struct {
+	timer_number timerNumber;
+} timer_deInt;
+
 /********************************************************************************************************
  * 											Prototypes												    *
  *******************************************************************************************************/
@@ -61,7 +92,7 @@ typedef struct {
  * Return: void
  */
 
-void Timer_Init(const timer_configiration *config_ptr);
+void Timer_Init(const timer_configuration *config_ptr);
 
 /*
  * Name: Timer0_deInit
@@ -70,6 +101,15 @@ void Timer_Init(const timer_configiration *config_ptr);
  * Return: void
  */
 
-void Timer_deInit(const timer_configiration *config_ptr);
+void Timer_deInit(const timer_deInt *deInt_ptr);
+
+/*
+ * Name: Timer0_setCallBack
+ * Description: Call back function.
+ * Input: pointer to function
+ * Return: None
+ */
+
+void Timer0_setCallBack(void (*a_ptr)(void));
 
 #endif /* TIMER_H_ */
